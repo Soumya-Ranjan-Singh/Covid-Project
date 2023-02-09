@@ -71,10 +71,68 @@ export const getAllData = async () => {
   // ]);
 
   // ---Get documents within a given range(i.e. 5 - 10)---
+  // const data = await Vaccine.aggregate([
+  //   { $project: { "Updated On": 1, State: 1, "Total Doses Administered": 1 } },
+  //   { $limit: 10 },
+  //   { $skip: 5 },
+  // ]);
+
+  // ---$addFields Implementation---
+  // const data = await Vaccine.aggregate([
+  //   { $addFields: { "Male+Female": { $add: ["$Male (Doses Administered)", "$Female (Doses Administered)"] } } },
+  //   { $project: { State: 1, Sites: 1, "Male+Female": 1, "Total Doses Administered": 1 } },
+  //   { $match: { State: "Assam", Sites: { $gt: 20, $lt: 100 } } },
+  //   { $sort: { Sites: 1 } }
+  // ]);
+
+  // ---$lookup Implementation--- (The $lookup stage adds a new array field to each input document.)
+  // const data = await Vaccine.aggregate([
+  //   {
+  //     $lookup:
+  //     {
+  //       from: "StatewiseTestingDetails",
+  //       localField: "State",
+  //       foreignField: "State",
+  //       as: "state_docs"
+  //     }
+  //   },
+  //   { $match: { State: "Assam" } }
+  // ]);
+
+  // ---$unwind Implementation--- (Deconstructs an array field from the input documents to output a document for each element.)
+  // const data = await Vaccine.aggregate([
+  //   {
+  //     $lookup:
+  //     {
+  //       from: "StatewiseTestingDetails",
+  //       localField: "State",
+  //       foreignField: "State",
+  //       as: "state_docs"
+  //     }
+  //   },
+  //   { $match: { State: "Goa" } },
+  //   { $unwind: { path: "$state_docs", preserveNullAndEmptyArrays: false } }
+  // ]);
+
+  // ---$redact Implementation---
+  /**
+   * $DESCEND: returns the fields at the current document level, excluding embedded documents.
+   * $$PRUNE: excludes all fields at this current document/embedded document level.
+   * $$KEEP: returns or keeps all fields at this current document/embedded document level.
+   */
   const data = await Vaccine.aggregate([
-    { $project: { "Updated On": 1, State: 1, "Total Doses Administered": 1 } },
-    { $limit: 10 },
-    { $skip: 5 },
+    [
+      { $match: { State: "Assam" } },
+      {
+        $redact: {
+          $cond: {
+            if: { $eq: ["$Updated On", new Date("2021-02-01")] },
+            then: "$$DESCEND",
+            else: "$$PRUNE"
+          }
+        }
+      }
+    ]
   ]);
 
   if (data.length != 0) {
