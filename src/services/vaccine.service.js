@@ -120,19 +120,49 @@ export const getAllData = async () => {
    * $$PRUNE: excludes all fields at this current document/embedded document level.
    * $$KEEP: returns or keeps all fields at this current document/embedded document level.
    */
+  // const data = await Vaccine.aggregate([
+  //   {
+  //     $lookup:
+  //     {
+  //       from: "StatewiseTestingDetails",
+  //       localField: "State",
+  //       foreignField: "State",
+  //       as: "state_docs"
+  //     }
+  //   },
+  //   { $match: { State: "Assam" } },
+  //   {
+  //     $redact: {
+  //       $cond: {
+  //         if: { $eq: ["$Updated On", new Date("2021-02-01")] },
+  //         then: "$$PRUNE",
+  //         else: "$$KEEP"
+  //       }
+  //     }
+  //   }
+  // ]);
+
+  // ---$unionWith--- (Performs a union of two collections, combines pipeline results from two collections into a single result set.)
+  // const data = await Vaccine.aggregate([
+  //   { $project: { State: 1, "Updated On": 1 } },
+  //   { $unionWith: { coll: "StatewiseTestingDetails", pipeline: [{ $project: { Date: 1, TotalSamples: 1 } }] } },
+  // ]);
+
+  // ---$unset--- (Removes/excludes fields from documents.)
+  // const data = await Vaccine.aggregate([
+  //   { $unset: ["AEFI", "Updated On"] }
+  // ]);
+
+  // ---$sortByCount--- (Computes the count of documents in each distinct group.)
+  // const data = await Vaccine.aggregate([
+  //   { $sortByCount: "$State" }
+  // ]);
+
+  // ---$out--- (Takes the documents returned by the aggregation pipeline and writes them to a specified collection.)
   const data = await Vaccine.aggregate([
-    [
-      { $match: { State: "Assam" } },
-      {
-        $redact: {
-          $cond: {
-            if: { $eq: ["$Updated On", new Date("2021-02-01")] },
-            then: "$$DESCEND",
-            else: "$$PRUNE"
-          }
-        }
-      }
-    ]
+    { $group: { _id: "$State", totalDoses: { $sum: "$Total Doses Administered" } } },
+    { $sort: { _id: 1 } },
+    { $out: { db: "COVID", coll: "TotalDosesInStates" } }
   ]);
 
   if (data.length != 0) {
