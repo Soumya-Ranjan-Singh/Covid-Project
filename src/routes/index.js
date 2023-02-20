@@ -2,6 +2,7 @@ import express from 'express';
 const router = express.Router();
 
 import vaccineRoute from './vaccine.route';
+import vaccineTestingRoute from './vaccineTesting.route';
 /**
  * Function contains Application routes
  *
@@ -12,6 +13,7 @@ const routes = () => {
     res.json('Welcome');
   });
   router.use('/vaccine', vaccineRoute);
+  router.use('/vaccineTesting', vaccineTestingRoute);
 
   return router;
 };
