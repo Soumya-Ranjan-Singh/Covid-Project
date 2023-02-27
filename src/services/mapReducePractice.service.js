@@ -1,4 +1,5 @@
 import MapReducePractice from '../models/mapReducePractice.model';
+import Vaccine from '../models/vaccine.model';
 
 //get all data
 export const getAllData = async () => {
@@ -54,6 +55,25 @@ export const getReduceData = async () => {
     ]);
 
     if (data.length != 0) {
+        return data;
+    } else {
+        throw new Error('No data available');
+    }
+};
+
+//get mapReduce data
+export const getmapReduceData = async () => {
+    const data = await Vaccine.mapReduce(
+        function () {
+            emit(this.States, this.Sessions);
+        },
+        function (key, totalSessions) {
+            return Array.sum(totalSessions);
+        },
+        { out: "NewMapReduceCollection" }
+    );
+
+    if (data != null) {
         return data;
     } else {
         throw new Error('No data available');
