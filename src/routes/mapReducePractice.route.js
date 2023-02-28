@@ -15,4 +15,7 @@ router.get('/reduce', mapReduceController.getReduceData);
 //route to get mapReduce data
 router.get('/mapReduce', mapReduceController.getmapReduceData);
 
+//route to get filter, map & reduce data
+router.get('/filterMapReduce', mapReduceController.getFilterMapReduceData);
+
 export default router;

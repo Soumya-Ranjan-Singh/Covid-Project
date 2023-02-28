@@ -79,3 +79,51 @@ export const getmapReduceData = async () => {
         throw new Error('No data available');
     }
 };
+
+//get filter, map & reduce data
+export const getFilterMapReduceData = async () => {
+    const data = await Vaccine.aggregate(
+        [
+            {
+                $group: {
+                    _id: "$State",
+                    "Array": { $push: "$Sites" }
+                }
+            },
+            {
+                $project: {
+                    "lessThan50Sites": {
+                        $filter: {
+                            input: "$Array",
+                            as: "value",
+                            cond: { $lt: ["$$value", 50] }
+                        }
+                    },
+                    "multiplySites": {
+                        $map: {
+                            input: "$Array",
+                            as: "value",
+                            in: { $multiply: ["$$value", 2] }
+                        }
+                    },
+                    "totalSites": {
+                        $reduce: {
+                            input: "$Array",
+                            initialValue: 0,
+                            in: { $add: ["$$value", "$$this"] }
+                        }
+                    }
+                }
+            },
+            {
+                $sort: { _id: 1 }
+            }
+        ]
+    );
+
+    if (data != null) {
+        return data;
+    } else {
+        throw new Error('No data available');
+    }
+};

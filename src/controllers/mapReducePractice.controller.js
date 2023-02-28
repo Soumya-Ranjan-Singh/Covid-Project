@@ -97,3 +97,27 @@ export const getmapReduceData = async (req, res, next) => {
         logger.error(error);
     }
 };
+
+/**
+* Controller to get filter, map & reduce data
+* @param  {object} req - request object
+* @param {object} res - response object
+* @param {Function} next
+*/
+export const getFilterMapReduceData = async (req, res, next) => {
+    try {
+        const data = await mapReduceService.getFilterMapReduceData();
+        res.status(HttpStatus.OK).json({
+            code: HttpStatus.OK,
+            data: data,
+            message: 'All data fetched successfully'
+        });
+        logger.info('All data fetched successfully');
+    } catch (error) {
+        res.status(HttpStatus.BAD_REQUEST).json({
+            code: HttpStatus.BAD_REQUEST,
+            message: `${error}`
+        });
+        logger.error(error);
+    }
+};
